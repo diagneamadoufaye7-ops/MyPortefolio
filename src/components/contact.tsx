@@ -4,15 +4,21 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CheckCircle2, Loader2, Send } from "lucide-react";
+import { CheckCircle2, Clock, Loader2, Send } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa6";
-import { profile } from "@/lib/content";
+import { contactSubjects, profile } from "@/lib/content";
 import { Reveal } from "@/components/ui/reveal";
 import { sendContactMessage } from "@/app/actions/contact";
+
+const subjectValues = contactSubjects.map((s) => s.value) as [
+  string,
+  ...string[],
+];
 
 const schema = z.object({
   name: z.string().min(2, "Ton nom est un peu court"),
   email: z.string().email("Adresse email invalide"),
+  subject: z.enum(subjectValues, { message: "Choisis un sujet" }),
   message: z.string().min(10, "Un message un peu plus détaillé serait utile"),
 });
 
@@ -29,7 +35,10 @@ export function Contact() {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { subject: "" as FormValues["subject"] },
+  });
 
   const onSubmit = (values: FormValues) => {
     setStatus("idle");
@@ -64,9 +73,15 @@ export function Contact() {
             <Reveal delay={0.1}>
               <p className="mt-5 max-w-md text-base leading-relaxed text-muted">
                 Basé à {profile.location}, ouvert aux opportunités en DBA,
-                Data Engineering, Data Science ou IA. Passez par le
-                formulaire, je réponds rapidement.
+                Data Engineering, Data Science ou IA. Décrivez votre besoin
+                ci-contre, je réponds sous 24h.
               </p>
+            </Reveal>
+            <Reveal delay={0.12}>
+              <div className="mt-6 flex items-center gap-2.5 text-sm text-muted">
+                <Clock size={16} className="text-accent" />
+                Réponse garantie sous 24h, par email
+              </div>
             </Reveal>
             <Reveal delay={0.15}>
               <div className="mt-8 flex items-center gap-4">
@@ -141,6 +156,35 @@ export function Contact() {
 
                 <div className="sm:col-span-2">
                   <label
+                    htmlFor="subject"
+                    className="text-xs font-medium text-muted"
+                  >
+                    Sujet
+                  </label>
+                  <select
+                    id="subject"
+                    defaultValue=""
+                    {...register("subject")}
+                    className="mt-2 w-full appearance-none rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-accent"
+                  >
+                    <option value="" disabled>
+                      Choisissez un sujet
+                    </option>
+                    {contactSubjects.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.subject && (
+                    <p className="mt-1.5 text-xs text-danger">
+                      {errors.subject.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label
                     htmlFor="message"
                     className="text-xs font-medium text-muted"
                   >
@@ -151,7 +195,7 @@ export function Contact() {
                     rows={5}
                     {...register("message")}
                     className="mt-2 w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-accent"
-                    placeholder="Parlez-moi de votre projet..."
+                    placeholder="Décrivez votre projet, votre besoin ou votre offre..."
                   />
                   {errors.message && (
                     <p className="mt-1.5 text-xs text-danger">
@@ -176,8 +220,8 @@ export function Contact() {
 
               {status === "success" && (
                 <p className="mt-4 flex items-center gap-2 text-sm text-accent">
-                  <CheckCircle2 size={16} /> Message envoyé, merci ! Je vous
-                  réponds rapidement.
+                  <CheckCircle2 size={16} /> Message envoyé et confirmation
+                  reçue par email — je vous réponds sous 24h.
                 </p>
               )}
               {status === "error" && (

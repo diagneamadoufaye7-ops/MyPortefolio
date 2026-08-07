@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { inter, spaceGrotesk, jetbrainsMono } from "@/lib/fonts";
 import { seo, profile } from "@/lib/content";
 import { SmoothScrollProvider } from "@/components/smooth-scroll-provider";
+import { SiteLoader } from "@/components/site-loader";
 import "./globals.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://amadoufayediagne.vercel.app";
@@ -47,6 +48,7 @@ export default function RootLayout({
       className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <SiteLoader />
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
       </body>
     </html>

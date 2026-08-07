@@ -2,10 +2,21 @@
 
 import { Resend } from "resend";
 import { z } from "zod";
+import { contactSubjects, profile } from "@/lib/content";
+
+const subjectValues = contactSubjects.map((s) => s.value) as [
+  string,
+  ...string[],
+];
+
+const subjectLabels: Record<string, string> = Object.fromEntries(
+  contactSubjects.map((s) => [s.value, s.label])
+);
 
 const contactSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.string().email(),
+  subject: z.enum(subjectValues),
   message: z.string().min(10).max(2000),
 });
 
@@ -30,18 +41,32 @@ export async function sendContactMessage(
     return { ok: false, error: "not_configured" };
   }
 
+  const { name, email, subject, message } = parsed.data;
+  const subjectLabel = subjectLabels[subject] ?? subject;
+  const resend = new Resend(apiKey);
+
   try {
-    const resend = new Resend(apiKey);
-    const { name, email, message } = parsed.data;
     await resend.emails.send({
       from: "Portfolio <onboarding@resend.dev>",
       to,
       replyTo: email,
-      subject: `Nouveau message de ${name} via le portfolio`,
-      text: `De: ${name} <${email}>\n\n${message}`,
+      subject: `[Portfolio] ${subjectLabel} — ${name}`,
+      text: `Nom: ${name}\nEmail: ${email}\nSujet: ${subjectLabel}\n\nMessage:\n${message}`,
     });
-    return { ok: true };
   } catch {
     return { ok: false, error: "send_failed" };
   }
+
+  try {
+    await resend.emails.send({
+      from: `${profile.fullName} <onboarding@resend.dev>`,
+      to: email,
+      subject: `Merci pour votre message, ${name}`,
+      text: `Bonjour ${name},\n\nMerci pour votre message concernant : ${subjectLabel}.\nJe reviens vers vous sous 24h.\n\nVotre message :\n${message}\n\nÀ très bientôt,\n${profile.fullName}`,
+    });
+  } catch {
+    // L'accusé de réception est secondaire : son échec ne doit pas faire échouer l'envoi principal.
+  }
+
+  return { ok: true };
 }

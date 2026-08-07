@@ -312,6 +312,15 @@ export const certifications: Certification[] = [
   },
 ];
 
+export const contactSubjects = [
+  { value: "opportunite", label: "Opportunité d'emploi" },
+  { value: "freelance", label: "Projet freelance" },
+  { value: "collaboration", label: "Collaboration" },
+  { value: "migration", label: "Migration de données / Cloud" },
+  { value: "data-analysis", label: "Analyse de données / Data Science" },
+  { value: "autre", label: "Autre" },
+] as const;
+
 export const seo = {
   title: "Amadou Faye Diagne — DBA & Data Scientist",
   description:

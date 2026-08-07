@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# MyPortefolio
-=======
 # Portfolio — Amadou Faye Diagne
 
 Portfolio premium construit avec Next.js (App Router), TypeScript, TailwindCSS et Framer Motion.
@@ -47,4 +44,3 @@ npm run start
 ## Déploiement
 
 Le projet est prêt pour un déploiement sur [Vercel](https://vercel.com/new). Penser à renseigner les variables d'environnement ci-dessus dans les paramètres du projet Vercel.
->>>>>>> 95cc4a9 (Initial commit)
